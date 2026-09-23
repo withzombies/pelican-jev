@@ -20,7 +20,7 @@ class Stroke:
     width: int = 5
 
 
-def _sample_line(points: tuple[Point, ...], maximum: float = 32) -> tuple[Point, ...]:
+def _sample_line(points: tuple[Point, ...], maximum: float = 45) -> tuple[Point, ...]:
     result = [points[0]]
     for start, end in zip(points[:-1], points[1:], strict=True):
         count = max(1, ceil(hypot(end[0] - start[0], end[1] - start[1]) / maximum))
@@ -34,7 +34,7 @@ def _sample_line(points: tuple[Point, ...], maximum: float = 32) -> tuple[Point,
     return tuple(result)
 
 
-def _curve(start: Point, c1: Point, c2: Point, end: Point, count: int = 12) -> tuple[Point, ...]:
+def _curve(start: Point, c1: Point, c2: Point, end: Point, count: int = 6) -> tuple[Point, ...]:
     points = []
     for index in range(count + 1):
         t = index / count
@@ -48,7 +48,7 @@ def _curve(start: Point, c1: Point, c2: Point, end: Point, count: int = 12) -> t
     return tuple(points)
 
 
-def _circle(cx: float, cy: float, radius: float, count: int = 40) -> tuple[Point, ...]:
+def _circle(cx: float, cy: float, radius: float, count: int = 32) -> tuple[Point, ...]:
     return tuple(
         (cx + radius * cos(2 * pi * index / count), cy + radius * sin(2 * pi * index / count))
         for index in range(count + 1)

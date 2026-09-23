@@ -16,6 +16,11 @@ def test_guide_has_bicycle_and_pelican_parts() -> None:
     assert all(len(stroke.points) >= 2 for stroke in strokes)
 
 
+def test_guide_fits_a_watchable_live_decision_budget() -> None:
+    moves = sum(len(stroke.points) - 1 for stroke in build_strokes())
+    assert moves <= 240
+
+
 def test_candidate_endpoints_stay_near_guide() -> None:
     turtle = Turtle()
     for stroke in build_strokes():
