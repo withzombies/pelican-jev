@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .jev import JevClient
-from .proposer import CodexProposer, Proposal, drawing_state
+from .proposer import PROPOSER_MODEL, CodexProposer, Proposal, drawing_state
 from .turtle import Turtle
 
 TRACE_VERSION = 3
@@ -113,7 +113,7 @@ def generate_trace(
         trace = {
             "schema_version": TRACE_VERSION,
             "model": client.model,
-            "proposer": "Codex CLI",
+            "proposer": f"Codex CLI ({PROPOSER_MODEL})",
             "max_rounds": max_rounds,
             "complete": False,
             "rounds": [],

@@ -15,6 +15,7 @@ from PIL import Image, ImageDraw
 from .turtle import HEIGHT, WIDTH, Turtle
 
 GOAL = "Draw a humorous pelican on a bicycle"
+PROPOSER_MODEL = "gpt-6-sol"
 SCHEMA = {
     "type": "object",
     "properties": {
@@ -147,13 +148,14 @@ class CodexProposer:
         schema_path.write_text(json.dumps(SCHEMA), encoding="utf-8")
         command = [
             "codex", "exec", "--ephemeral", "--skip-git-repo-check",
-            "--sandbox", "read-only", "--ignore-user-config", "-C", str(directory),
+            "--sandbox", "read-only", "--ignore-user-config", "-m", PROPOSER_MODEL,
+            "-C", str(directory),
             "--output-schema", str(schema_path), "-o", str(response_path),
             "-i", str(preview), "-",
         ]
         try:
             result = subprocess.run(command, input=CodexProposer.prompt(state), text=True,
-                                    capture_output=True, timeout=180, check=False)
+                                    capture_output=True, timeout=240, check=False)
         except (OSError, subprocess.TimeoutExpired) as error:
             raise ProposalError(f"could not run Codex proposer: {error}") from error
         if result.returncode or not response_path.exists():
