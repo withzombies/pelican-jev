@@ -111,12 +111,10 @@ class CodexProposer:
         if not isinstance(raw, dict) or not isinstance(raw.get("candidates"), list):
             raise ProposalError("proposer returned no candidate list")
         rows = raw["candidates"]
-        if len(rows) != 3 or {row.get("id") for row in rows if isinstance(row, dict)} != {
-            "1", "2", "3"
-        }:
-            raise ProposalError("proposer must return three distinct candidate IDs")
+        if len(rows) != 3 or any(not isinstance(row, dict) for row in rows):
+            raise ProposalError("proposer must return three candidates")
         proposals = []
-        for row in rows:
+        for index, row in enumerate(rows, start=1):
             label = row.get("label")
             commands = row.get("commands")
             if not isinstance(label, str) or not 1 <= len(label) <= 120:
@@ -138,7 +136,7 @@ class CodexProposer:
                 [*segment.start, *segment.end]
                 for segment in simulated.segments[len(turtle.segments):]
             ]
-            proposals.append(Proposal(row["id"], label, commands, added))
+            proposals.append(Proposal(str(index), label, commands, added))
         return proposals
 
     @staticmethod

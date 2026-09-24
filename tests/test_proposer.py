@@ -53,6 +53,14 @@ def test_proposer_rejects_invalid_or_empty_candidate() -> None:
         CodexProposer(transport=lambda _state, _preview: empty).propose(Turtle())
 
 
+def test_proposer_assigns_stable_local_ids() -> None:
+    raw = candidates()
+    for row, model_id in zip(raw["candidates"], ("A", "B", "C"), strict=True):
+        row["id"] = model_id
+    proposals = CodexProposer(transport=lambda _state, _preview: raw).propose(Turtle())
+    assert [proposal.id for proposal in proposals] == ["1", "2", "3"]
+
+
 def test_proposer_never_sends_previous_attempts() -> None:
     seen = []
 
