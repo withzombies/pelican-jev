@@ -105,10 +105,17 @@ def generate_trace(
     if resume:
         trace = json.loads(path.read_text(encoding="utf-8"))
         turtle = replay_trace(path)
-        if trace.get("model") != client.model or trace.get("max_rounds") != max_rounds:
+        previous_limit = trace.get("max_rounds")
+        if trace.get("model") != client.model or not isinstance(previous_limit, int):
             raise ValueError("trace settings differ from the requested run")
-        if trace.get("complete"):
+        if max_rounds < previous_limit:
+            raise ValueError("cannot shrink a saved drawing's round budget")
+        if trace.get("complete") and max_rounds == previous_limit:
             return trace
+        if max_rounds > previous_limit:
+            trace["max_rounds"] = max_rounds
+            trace["complete"] = False
+            _save(path, trace)
     else:
         trace = {
             "schema_version": TRACE_VERSION,

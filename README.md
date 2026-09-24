@@ -12,7 +12,7 @@ Install Python 3.11+, Pillow, FFmpeg with `libx264`, and the [Codex CLI](https:/
 python3.11 -m pelican_jev draw
 ```
 
-The command writes `output/decisions.json` and `output/pelican_on_bicycle.mp4`. The default is ten proposal/choice rounds; use `--max-rounds` to change it. If a model call interrupts a run, continue from the last completed round with the same round budget:
+The command writes `output/decisions.json` and `output/pelican_on_bicycle.mp4`. The default is ten proposal/choice rounds; use `--max-rounds` to change it. If a model call interrupts a run, continue from the last completed round. You can also extend a completed drawing by resuming with a larger round budget:
 
 ```sh
 python3.11 -m pelican_jev draw --resume

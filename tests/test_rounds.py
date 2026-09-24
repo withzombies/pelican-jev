@@ -82,6 +82,21 @@ def test_round_trace_resumes_without_repeating_accepted_strokes(tmp_path) -> Non
     assert len(replay_trace(path).segments) == 2
 
 
+def test_completed_trace_can_be_extended_with_more_jev_rounds(tmp_path) -> None:
+    path = tmp_path / "trace.json"
+    first = generate_trace(
+        JevClient(transport=lambda _payload: _response("1")), path,
+        proposer=CodexProposer(transport=_candidates), max_rounds=1,
+    )
+    extended = generate_trace(
+        JevClient(transport=lambda _payload: _response("2")), path,
+        proposer=CodexProposer(transport=_candidates), max_rounds=2, resume=True,
+    )
+    assert extended["complete"] is True
+    assert len(extended["rounds"]) == 2
+    assert extended["rounds"][0] == first["rounds"][0]
+
+
 def test_trace_rejects_command_outside_jev_selected_batch(tmp_path) -> None:
     path = tmp_path / "trace.json"
     trace = generate_trace(
