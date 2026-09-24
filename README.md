@@ -1,30 +1,30 @@
-# Jev Logo turtle: pelican on a bicycle
+# Jev Logo turtle: a pelican on a bicycle
 
-Jev chooses every Logo command from a blank 960×720 canvas. The request tells Jev only the overall goal, its current position and heading, whether the pen is down, the lines on the current canvas, and the available commands. No previous commands or attempts are sent. There are no feature labels, target points, or planned strokes. The command set includes `PENUP`, `PENDOWN`, `FORWARD`, `BACK`, `LEFT`, `RIGHT`, and `DONE`; movement distances and turn angles are bounded choices because [Jev's API returns typed choices](https://api.typesafe.ai/docs), not arbitrary command text.
+This project makes a short, shareable video of a Logo turtle drawing a humorous pelican on a bicycle. A Codex sketch proposer sees only that goal and the current canvas, then offers three short sequences of ordinary Logo commands. Jev chooses one sequence and the turtle executes its `PENUP`, `PENDOWN`, and movement commands. The loop repeats from the updated canvas. No bicycle or pelican parts are hard-coded in the project prompt or geometry.
 
-The program stores each Jev decision in `output/decisions.json` and animates those exact commands, including the large moving turtle, pen changes, question, and response, in `output/pelican_on_bicycle.mp4`. The video is a 1280×720, 30 fps H.264 MP4. The included live run drew a horizontal line and then mostly turned in place; it is an honest unguided attempt, not a recognizable pelican or bicycle.
+The two model roles are explicit in the video: **Codex proposes; Jev chooses**. Jev's [typed API](https://api.typesafe.ai/openapi.json) chooses among supplied candidates rather than generating arbitrary command text. Every proposal, Jev choice, and executed command is saved in the trace for inspection and key-free replay.
 
 ## Run
 
-Use Python 3.11+, Pillow, and FFmpeg with `libx264`. Install dependencies with `uv sync --extra dev`, or use an environment where they are already available. Set `TYPESAFE_API_KEY` in your environment. The key is never written to the trace or video.
+Install Python 3.11+, Pillow, FFmpeg with `libx264`, and the [Codex CLI](https://learn.chatgpt.com/docs/non-interactive-mode). Sign in to Codex CLI and set `TYPESAFE_API_KEY` in your environment. Install Python dependencies with `uv sync --extra dev`, or use an environment where they are already available.
 
 ```sh
 python3.11 -m pelican_jev draw
 ```
 
-The default decision budget is 180 commands. Jev may finish sooner by selecting `DONE`; otherwise the run stops at the budget. To change it, use `--max-steps 240`. If a network or API problem interrupts the run, resume with the same budget:
+The command writes `output/decisions.json` and `output/pelican_on_bicycle.mp4`. The default is ten proposal/choice rounds; use `--max-rounds` to change it. If a model call interrupts a run, continue from the last completed round with the same round budget:
 
 ```sh
 python3.11 -m pelican_jev draw --resume
 ```
 
-Replay a completed trace without a key or more Jev calls:
+Replay a completed trace without either model:
 
 ```sh
 python3.11 -m pelican_jev replay
 ```
 
-Use `--trace`, `--output`, `--frames-per-step`, and `--hold-seconds` to change locations or pacing. The default 180-command video lasts about 32 seconds, within [X's standard video length limit](https://help.x.com/en/using-x/x-videos).
+The video is 1280×720, 30 fps, H.264/yuv420p. Use `--trace`, `--output`, `--frames-per-step`, and `--hold-seconds` to adjust paths or pacing. The CLI uses [Codex noninteractive mode](https://learn.chatgpt.com/docs/non-interactive-mode) with a JSON output schema and a read-only sandbox. It passes the current canvas image to the proposer; the project validates all commands and canvas bounds before sending candidates to Jev.
 
 ## Verify
 
@@ -34,4 +34,4 @@ python3.11 -m pytest -q
 python3.11 -m ruff check .
 ```
 
-The choice loop follows [TypeSafe's browser agent](https://github.com/TypeSafeAI/typesafe-playground/blob/main/docs/jev-browser-agent.md), which observes current state and asks Jev to select from a bounded action set. The API request shape follows [TypeSafe's schema](https://api.typesafe.ai/docs).
+The proposal-and-choice loop follows the same division of work as the [TypeSafe community Jev harness](https://github.com/TypeSafeAI/jev-harness) and its [candidate-ranking examples](https://github.com/TypeSafeAI/typesafe-playground/blob/main/docs/document-extraction.md).

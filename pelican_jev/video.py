@@ -66,7 +66,7 @@ def _compose(canvas: Image.Image, record: dict[str, Any] | None, step: int, tota
     draw.text((73, 84), "Jev directs a Logo turtle", fill="#65717a", font=_font(15))
     draw.rectangle((WIDTH, 0, VIDEO_WIDTH, HEIGHT), fill=NAVY)
     draw.text((994, 48), "LOGO / TURTLEDRAW", fill=ORANGE, font=_font(22))
-    draw.text((995, 86), "JEV CHOOSES EVERY COMMAND", fill="#a8b9c7", font=_font(12))
+    draw.text((995, 86), "CODEX PROPOSES · JEV CHOOSES", fill="#a8b9c7", font=_font(12))
     draw.line((994, 123, 1246, 123), fill="#476174", width=2)
     draw.text((994, 148), "CURRENT STATE", fill="#a8b9c7", font=_font(13))
     draw.text((994, 174), f"X {x:.0f}  Y {y:.0f}", fill="#ffffff", font=_font(18))
@@ -76,18 +76,21 @@ def _compose(canvas: Image.Image, record: dict[str, Any] | None, step: int, tota
     question = record["question"] if record else "What Logo command should come next?"
     for index, line in enumerate(textwrap.wrap(question, width=33)[:4]):
         draw.text((994, 275 + index * 20), line, fill="#ffffff", font=_font(14))
-    draw.text((994, 379), "AVAILABLE COMMANDS", fill="#a8b9c7", font=_font(13))
-    options = record["options"] if record else {}
-    families = ["PENUP / PENDOWN", "FORWARD / BACK", "LEFT / RIGHT", "DONE"]
-    for index, label in enumerate(families):
-        draw.text((994, 403 + index * 22), label, fill="#c8d5df", font=_font(13))
+    draw.text((994, 365), "PROPOSED STROKES", fill="#a8b9c7", font=_font(13))
+    labels = record.get("candidate_labels", {}) if record else {}
+    for index, (option_id, label) in enumerate(labels.items()):
+        color = ORANGE if record and record["jev_choice"] == option_id else "#c8d5df"
+        draw.text((994, 389 + index * 37), f"{option_id}  {textwrap.shorten(label, 31)}",
+                  fill=color, font=_font(13))
     draw.line((994, 506, 1246, 506), fill="#476174", width=2)
-    draw.text((994, 524), "JEV RESPONSE / LOGO", fill="#a8b9c7", font=_font(13))
-    choice = record["choice"] if record else "READY"
-    draw.text((994, 549), choice.replace("_", " "), fill=ORANGE, font=_font(27))
+    draw.text((994, 524), "JEV SELECTED", fill="#a8b9c7", font=_font(13))
+    selected = record["jev_choice"] if record else "–"
+    draw.text((994, 545), f"STROKE {selected}", fill=ORANGE, font=_font(26))
     if record:
-        confidence = f"{record['confidence']:.0%} confidence · {len(options)} options"
-        draw.text((994, 591), confidence, fill="#ffffff", font=_font(15))
+        confidence = f"{record['jev_confidence']:.0%} confidence"
+        draw.text((994, 578), confidence, fill="#ffffff", font=_font(14))
+    choice = record["choice"] if record else "READY"
+    draw.text((994, 610), choice.replace("_", " "), fill=GREEN, font=_font(19))
     draw.text((994, 654), f"COMMAND {step:03d} / {total:03d}", fill="#ffffff", font=_font(15))
     draw.rectangle((994, 685, 1246, 693), fill="#476174")
     if total:
