@@ -86,6 +86,32 @@ def test_live_drawing_offers_two_distinct_guided_moves(tmp_path) -> None:
     assert criteria["left"] != criteria["right"]
 
 
+def test_jev_sees_the_goal_and_current_turtle_state_without_feature_hints(tmp_path) -> None:
+    requests = []
+
+    def transport(payload):
+        requests.append(payload)
+        if len(requests) == 3:
+            raise PermanentJevError("stop after two moves")
+        return {"answers": {"move": {"type": "choice", "choice": "right", "confidence": 0.7}}}
+
+    with pytest.raises(PermanentJevError):
+        generate_trace(JevClient(transport=transport), tmp_path / "decisions.json")
+    first = requests[0]
+    second = requests[1]
+    assert first["state"]["goal"] == "Draw a pelican on a bicycle with a Logo turtle"
+    assert set(first["state"]) == {"goal", "step", "turtle", "recent_moves", "drawing_so_far"}
+    assert first["state"]["turtle"]["pen_down"] is True
+    assert first["state"]["recent_moves"] == []
+    assert first["state"]["drawing_so_far"] == []
+    assert len(second["state"]["recent_moves"]) == 1
+    assert len(second["state"]["drawing_so_far"]) == 1
+    assert second["state"]["turtle"]["x"] != first["state"]["turtle"]["x"]
+    assert first["questions"]["move"]["instructions"] == (
+        "Which turtle move should come next to draw a pelican on a bicycle?"
+    )
+
+
 def test_trace_captures_each_question_and_jev_response(tmp_path) -> None:
     path = tmp_path / "decisions.json"
     requests = []
@@ -105,7 +131,7 @@ def test_trace_captures_each_question_and_jev_response(tmp_path) -> None:
 
     trace = generate_trace(JevClient(transport=transport), path)
     first = trace["steps"][0]
-    assert "rear wheel" in first["question"]
+    assert first["question"] == "Which turtle move should come next to draw a pelican on a bicycle?"
     assert first["question"] == requests[0]["questions"]["move"]["instructions"]
     assert set(first["options"]) == {"left", "right"}
     assert first["options"] == requests[0]["questions"]["move"]["criteria"]

@@ -112,30 +112,45 @@ def generate_trace(
             continue
         moves = candidate_moves(stroke, point_index, turtle)
         state = {
-            "goal": "Draw a recognizable pelican riding a bicycle with smooth Logo turtle strokes",
-            "part": stroke.part,
+            "goal": "Draw a pelican on a bicycle with a Logo turtle",
             "step": step_number + 1,
-            "total_steps": len(planned),
-            "position": [round(turtle.x, 2), round(turtle.y, 2)],
-            "heading_degrees": round(turtle.heading, 2),
-            "guide_target": [round(value, 2) for value in stroke.points[point_index]],
-            "recent_choices": [record["choice"] for record in trace["steps"][-6:]],
+            "turtle": {
+                "x": round(turtle.x, 2),
+                "y": round(turtle.y, 2),
+                "heading_degrees": round(turtle.heading, 2),
+                "pen_down": True,
+            },
+            "recent_moves": [
+                {
+                    "start": record["start"],
+                    "end": record["end"],
+                    "turn_degrees": record["turn_degrees"],
+                    "forward_pixels": record["forward_pixels"],
+                    "choice": record["choice"],
+                }
+                for record in trace["steps"][-6:]
+            ],
+            "drawing_so_far": [
+                [
+                    round(record["start"][0]),
+                    round(record["start"][1]),
+                    round(record["end"][0]),
+                    round(record["end"][1]),
+                ]
+                for record in trace["steps"]
+            ],
         }
         # Jev selected the exact guide center on every trial move when it was offered.
         # Offer two equally safe offsets so its live choices visibly shape the line.
         criteria = {
             name: (
                 f"{name}: turn {move.turn_degrees:+.1f} degrees, "
-                f"forward {move.forward_pixels:.1f} pixels to "
-                f"({move.end[0]:.1f}, {move.end[1]:.1f})"
+                f"forward {move.forward_pixels:.1f} pixels"
             )
             for name, move in moves.items()
             if name != "center"
         }
-        question = (
-            f"Which guided Logo turtle move should draw the "
-            f"{stroke.part.replace('_', ' ')} next? Keep its contour recognizable."
-        )
+        question = "Which turtle move should come next to draw a pelican on a bicycle?"
         decision = client.choose(state, criteria, instructions=question)
         move = moves[decision.choice]
         turtle.advance(move, stroke)

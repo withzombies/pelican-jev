@@ -1,6 +1,6 @@
 # Jev turtle: a pelican on a bicycle
 
-Jev from TypeSafe AI chooses each visible Logo-style turtle advance from two distinct bounded moves. A fixed guide keeps the pelican and bicycle recognizable. An animated turtle follows each stroke and travels with its pen up between paths. The program saves every live decision in a JSON trace and turns that exact run into a video with the question asked, both offered moves, Jev's answer and probabilities, and the resulting Logo commands.
+Jev from TypeSafe AI chooses each visible Logo-style turtle advance from two distinct bounded moves. It sees the overall goal, the turtle's current pose, recent moves, and the drawing so far; the question does not name the current feature or a target point. A fixed guide keeps the pelican and bicycle recognizable. An animated turtle follows each stroke and travels with its pen up between paths. The program saves every live decision in a JSON trace and turns that exact run into a video with the question asked, both offered moves, Jev's answer and probabilities, and the resulting Logo commands.
 
 ## Run
 
