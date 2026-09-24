@@ -1,88 +1,71 @@
-"""Small Logo-style turtle with bounded Jev move proposals."""
+"""A bounded Logo turtle. Jev decides every command and parameter."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from math import atan2, cos, degrees, hypot, radians, sin
+from math import cos, radians, sin
 
-from .guide import Point, Stroke
-
-
-@dataclass(frozen=True)
-class Move:
-    start: Point
-    end: Point
-    turn_degrees: float
-    forward_pixels: float
+WIDTH = 960
+HEIGHT = 720
+DISTANCES = (10, 20, 40, 80, 120)
+ANGLES = (15, 30, 45, 90, 120)
+Point = tuple[float, float]
 
 
 @dataclass(frozen=True)
 class Segment:
     start: Point
     end: Point
-    turn_degrees: float
-    forward_pixels: float
-    part: str
-    color: str
-    width: int
 
 
 @dataclass
 class Turtle:
-    x: float = 0.0
-    y: float = 0.0
+    x: float = WIDTH / 2
+    y: float = HEIGHT / 2
     heading: float = 0.0
+    pen_down: bool = False
     segments: list[Segment] = field(default_factory=list)
 
-    def reposition(self, point: Point) -> None:
-        """Travel to a stroke start with the pen up."""
-        self.x, self.y = point
-
-    def plan_to(self, end: Point) -> Move:
-        start = (self.x, self.y)
-        distance = hypot(end[0] - self.x, end[1] - self.y)
-        absolute = degrees(atan2(end[1] - self.y, end[0] - self.x))
-        turn = (absolute - self.heading + 180) % 360 - 180
-        return Move(start, end, turn, distance)
-
-    def advance(self, move: Move, stroke: Stroke) -> Segment:
-        if hypot(self.x - move.start[0], self.y - move.start[1]) > 0.001:
-            raise ValueError("move does not start at the turtle position")
-        heading = (self.heading + move.turn_degrees) % 360
-        calculated = (
-            self.x + cos(radians(heading)) * move.forward_pixels,
-            self.y + sin(radians(heading)) * move.forward_pixels,
-        )
-        if hypot(calculated[0] - move.end[0], calculated[1] - move.end[1]) > 0.001:
-            raise ValueError("move endpoint disagrees with its turn and distance")
-        segment = Segment(
-            move.start, move.end, move.turn_degrees, move.forward_pixels,
-            stroke.part, stroke.color, stroke.width,
-        )
-        self.x, self.y = move.end
-        self.heading = heading
-        self.segments.append(segment)
-        return segment
-
-    def advance_to(self, end: Point, stroke: Stroke) -> Segment:
-        return self.advance(self.plan_to(end), stroke)
+    def execute(self, command: str) -> None:
+        if command not in available_commands(self):
+            raise ValueError(f"command is not available: {command}")
+        if command == "PENUP":
+            self.pen_down = False
+        elif command == "PENDOWN":
+            self.pen_down = True
+        elif command == "DONE":
+            return
+        else:
+            action, amount_text = command.split("_")
+            amount = int(amount_text)
+            if action == "LEFT":
+                self.heading = (self.heading - amount) % 360
+            elif action == "RIGHT":
+                self.heading = (self.heading + amount) % 360
+            else:
+                distance = amount if action == "FORWARD" else -amount
+                start = (self.x, self.y)
+                self.x += cos(radians(self.heading)) * distance
+                self.y += sin(radians(self.heading)) * distance
+                if self.pen_down:
+                    self.segments.append(Segment(start, (self.x, self.y)))
 
 
-def candidate_moves(stroke: Stroke, point_index: int, turtle: Turtle) -> dict[str, Move]:
-    """Offer three nearby endpoints, closing the path exactly at its last point."""
-    if not 1 <= point_index < len(stroke.points):
-        raise IndexError("point_index is outside this stroke")
-    previous = stroke.points[point_index - 1]
-    guide = stroke.points[point_index]
-    dx, dy = guide[0] - previous[0], guide[1] - previous[1]
-    length = hypot(dx, dy)
-    if length == 0:
-        raise ValueError("guide contains a zero-length segment")
-    normal = (-dy / length, dx / length)
-    offset = 0 if point_index == len(stroke.points) - 1 else 5
-    return {
-        name: turtle.plan_to(
-            (guide[0] + sign * offset * normal[0], guide[1] + sign * offset * normal[1])
-        )
-        for name, sign in (("left", -1), ("center", 0), ("right", 1))
+def available_commands(turtle: Turtle) -> dict[str, str]:
+    """All valid Logo actions at this pose; canvas bounds are the only filter."""
+    options = {
+        "PENUP": "Lift the pen; movement stops drawing lines.",
+        "PENDOWN": "Lower the pen; movement draws lines.",
+        "DONE": "Finish the drawing now.",
     }
+    for action in ("FORWARD", "BACK"):
+        for distance in DISTANCES:
+            signed = distance if action == "FORWARD" else -distance
+            x = turtle.x + cos(radians(turtle.heading)) * signed
+            y = turtle.y + sin(radians(turtle.heading)) * signed
+            if 24 <= x <= WIDTH - 24 and 24 <= y <= HEIGHT - 24:
+                options[f"{action}_{distance}"] = f"{action} {distance} pixels."
+    for action in ("LEFT", "RIGHT"):
+        for angle in ANGLES:
+            options[f"{action}_{angle}"] = f"Turn {action.lower()} {angle} degrees in place."
+    return options

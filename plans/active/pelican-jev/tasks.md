@@ -9,7 +9,7 @@
 ## Blocked
 
 ## Done
-- [x] Build and test the fixed guide, bounded move choices, and Logo turtle.
-- [x] Add and test the live Jev decision loop and trace/replay.
-- [x] Add and test the video renderer and CLI.
-- [x] Generate and inspect the live MP4.
+- [x] Run and inspect an unguided Jev drawing, then produce the MP4 and report its visual limitation.
+- [x] Replace the fixed guide with generic Logo commands chosen by Jev.
+- [x] Record and replay every pen, turn, and move command.
+- [x] Animate questions, responses, and the turtle in an H.264 MP4.

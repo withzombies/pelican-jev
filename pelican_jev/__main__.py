@@ -22,14 +22,16 @@ def main(argv: list[str] | None = None) -> int:
         command.add_argument("--hold-seconds", type=float, default=2)
         if name == "draw":
             command.add_argument("--resume", action="store_true")
+            command.add_argument("--max-steps", type=int, default=180)
     options = parser.parse_args(argv)
     try:
         if options.command == "draw":
-            def progress(step: int, total: int, part: str) -> None:
+            def progress(step: int, total: int, choice: str) -> None:
                 if step == 1 or step % 10 == 0 or step == total:
-                    print(f"Jev move {step}/{total}: {part}", flush=True)
+                    print(f"Jev command {step}/{total}: {choice}", flush=True)
 
-            generate_trace(JevClient(), options.trace, resume=options.resume, on_progress=progress)
+            generate_trace(JevClient(), options.trace, resume=options.resume,
+                           max_steps=options.max_steps, on_progress=progress)
         output = render_video(
             options.trace,
             options.output,

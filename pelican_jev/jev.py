@@ -13,10 +13,7 @@ from math import isfinite
 from typing import Any
 
 API_URL = "https://api.typesafe.ai/v1/systemone"
-INSTRUCTIONS = (
-    "Choose the next Logo turtle move that keeps the current part smooth and recognizable. "
-    "Favor a natural contour and vary choices when useful."
-)
+INSTRUCTIONS = "Choose the next Logo command from the available actions."
 
 
 class JevError(RuntimeError):
