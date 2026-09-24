@@ -18,7 +18,7 @@ def main(argv: list[str] | None = None) -> int:
         command = commands.add_parser(name)
         command.add_argument("--trace", type=Path, default=Path("output/decisions.json"))
         command.add_argument("--output", type=Path, default=Path("output/pelican_on_bicycle.mp4"))
-        command.add_argument("--frames-per-step", type=int, default=5)
+        command.add_argument("--frames-per-step", type=int, default=3)
         command.add_argument("--hold-seconds", type=float, default=2)
         if name == "draw":
             command.add_argument("--resume", action="store_true")

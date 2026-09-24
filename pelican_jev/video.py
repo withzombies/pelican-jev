@@ -139,7 +139,7 @@ def render_final_frame(trace_path: Path) -> Image.Image:
     return _compose(canvas, None, 0, 0, WIDTH / 2, HEIGHT / 2, 0, False)
 
 
-def render_video(trace_path: Path, output_path: Path, *, frames_per_step: int = 5,
+def render_video(trace_path: Path, output_path: Path, *, frames_per_step: int = 3,
                  hold_seconds: float = 2) -> Path:
     if frames_per_step < 1 or hold_seconds < 0:
         raise ValueError("frames_per_step must be positive and hold_seconds nonnegative")

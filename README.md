@@ -24,7 +24,7 @@ Replay a completed trace without either model:
 python3.11 -m pelican_jev replay
 ```
 
-The video is 1280×720, 30 fps, H.264/yuv420p. Use `--trace`, `--output`, `--frames-per-step`, and `--hold-seconds` to adjust paths or pacing. The CLI uses [Codex noninteractive mode](https://learn.chatgpt.com/docs/non-interactive-mode) with a JSON output schema and a read-only sandbox. It passes the current canvas image to the proposer; the project validates all commands and canvas bounds before sending candidates to Jev.
+The video is 1280×720, 30 fps, H.264/yuv420p. The saved ten-round example is roughly 19 seconds and shows a top-hatted pelican with a fish at its beak. Use `--trace`, `--output`, `--frames-per-step`, and `--hold-seconds` to adjust paths or pacing. The CLI uses [Codex noninteractive mode](https://learn.chatgpt.com/docs/non-interactive-mode) with a JSON output schema and a read-only sandbox. It passes the current canvas image to the proposer; the project validates all commands and canvas bounds before sending candidates to Jev.
 
 ## Verify
 

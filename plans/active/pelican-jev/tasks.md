@@ -1,7 +1,6 @@
 # Tasks
 
 ## Now
-- [ ] Run a live proposal-and-Jev session, inspect recognizability, and publish the new MP4 locally.
 
 ## Next
 
@@ -10,6 +9,7 @@
 ## Blocked
 
 ## Done
+- [x] Run a live proposal-and-Jev session, inspect recognizability, and render the shareable MP4.
 - [x] Add and test generic `SETXY` movement.
 - [x] Add and test Codex candidate generation and validation.
 - [x] Add and test Jev selection of candidate command batches and trace replay.
