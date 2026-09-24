@@ -51,9 +51,10 @@ def _apply_record(turtle: Turtle, record: dict[str, Any]) -> None:
     if record.get("start") != _pose(turtle):
         raise ValueError("recorded command start does not match turtle state")
     choice = record.get("choice")
-    if choice not in available_commands(turtle):
-        raise ValueError("trace contains an unavailable command")
-    turtle.execute(choice)
+    try:
+        turtle.execute(choice)
+    except ValueError as error:
+        raise ValueError("trace contains an unavailable command") from error
     if record.get("end") != _pose(turtle):
         raise ValueError("recorded command end does not match turtle state")
 

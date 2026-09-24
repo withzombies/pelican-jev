@@ -112,6 +112,8 @@ def _pose(record: dict[str, Any], fraction: float) -> tuple[float, float, float,
         heading = (start["heading_degrees_clockwise"] - int(choice.split("_")[1]) * fraction) % 360
     elif choice.startswith("RIGHT_"):
         heading = (start["heading_degrees_clockwise"] + int(choice.split("_")[1]) * fraction) % 360
+    elif choice.startswith("SETXY_"):
+        heading = end["heading_degrees_clockwise"]
     else:
         heading = start["heading_degrees_clockwise"]
     pen_down = end["pen_down"] if fraction == 1 else start["pen_down"]
@@ -122,7 +124,9 @@ def render_final_frame(trace_path: Path) -> Image.Image:
     records = _load_completed(trace_path)
     canvas = Image.new("RGB", (WIDTH, HEIGHT), PAPER)
     for record in records:
-        if record["start"]["pen_down"] and record["choice"].startswith(("FORWARD_", "BACK_")):
+        if record["start"]["pen_down"] and record["choice"].startswith(
+            ("FORWARD_", "BACK_", "SETXY_")
+        ):
             start, end = record["start"], record["end"]
             _line(canvas, (start["x"], start["y"]), (end["x"], end["y"]))
     if records:
@@ -153,7 +157,9 @@ def render_video(trace_path: Path, output_path: Path, *, frames_per_step: int = 
         assert process.stdin is not None
         for step, record in enumerate(records, start=1):
             start, end = record["start"], record["end"]
-            draws = start["pen_down"] and record["choice"].startswith(("FORWARD_", "BACK_"))
+            draws = start["pen_down"] and record["choice"].startswith(
+                ("FORWARD_", "BACK_", "SETXY_")
+            )
             for frame_index in range(1, frames_per_step + 1):
                 fraction = frame_index / frames_per_step
                 partial = canvas.copy()

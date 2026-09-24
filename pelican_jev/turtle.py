@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from math import cos, radians, sin
+from math import atan2, cos, degrees, radians, sin
+from re import fullmatch
 
 WIDTH = 960
 HEIGHT = 720
@@ -27,8 +28,20 @@ class Turtle:
     segments: list[Segment] = field(default_factory=list)
 
     def execute(self, command: str) -> None:
+        target = fullmatch(r"SETXY_(\d{1,3})_(\d{1,3})", command)
+        if target:
+            x, y = (int(value) for value in target.groups())
+            if not (24 <= x <= WIDTH - 24 and 24 <= y <= HEIGHT - 24):
+                raise ValueError(f"command is unavailable: {command}")
+            start = (self.x, self.y)
+            if (x, y) != start:
+                self.heading = degrees(atan2(y - self.y, x - self.x)) % 360
+                self.x, self.y = x, y
+                if self.pen_down:
+                    self.segments.append(Segment(start, (x, y)))
+            return
         if command not in available_commands(self):
-            raise ValueError(f"command is not available: {command}")
+            raise ValueError(f"command is unavailable: {command}")
         if command == "PENUP":
             self.pen_down = False
         elif command == "PENDOWN":

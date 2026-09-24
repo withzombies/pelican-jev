@@ -56,6 +56,18 @@ def test_turtle_executes_pen_and_motion_commands() -> None:
     assert len(turtle.segments) == 1
 
 
+def test_turtle_setxy_draws_only_with_pen_down_and_rejects_off_canvas() -> None:
+    turtle = Turtle()
+    turtle.execute("SETXY_300_300")
+    assert turtle.segments == []
+    turtle.execute("PENDOWN")
+    turtle.execute("SETXY_320_330")
+    assert turtle.segments[-1].start == (300, 300)
+    assert turtle.segments[-1].end == (320, 330)
+    with pytest.raises(ValueError, match="unavailable"):
+        turtle.execute("SETXY_9999_300")
+
+
 def test_commands_are_generic_and_bounded() -> None:
     commands = available_commands(Turtle())
     assert {"PENUP", "PENDOWN", "FORWARD_40", "BACK_20", "LEFT_90", "RIGHT_90"} <= set(commands)
