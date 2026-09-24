@@ -40,6 +40,7 @@ class Decision:
     choice: str
     confidence: float
     model: str
+    probabilities: dict[str, float]
 
 
 Transport = Callable[[dict[str, Any]], dict[str, Any]]
@@ -56,14 +57,20 @@ class JevClient:
         self.sleep = sleep
         self.model = model
 
-    def choose(self, state: dict[str, Any], criteria: dict[str, str]) -> Decision:
+    def choose(
+        self,
+        state: dict[str, Any],
+        criteria: dict[str, str],
+        *,
+        instructions: str = INSTRUCTIONS,
+    ) -> Decision:
         if not criteria:
             raise ValueError("Jev needs at least one offered move")
         payload = {
             "state": state,
             "model": self.model,
             "questions": {
-                "move": {"type": "choice", "instructions": INSTRUCTIONS, "criteria": criteria}
+                "move": {"type": "choice", "instructions": instructions, "criteria": criteria}
             },
         }
         for attempt in range(3):
@@ -91,8 +98,25 @@ class JevClient:
             or not 0 <= confidence <= 1
         ):
             raise InvalidJevResponse("Jev returned invalid confidence")
+        raw_probabilities = answer.get("probabilities")
+        probabilities = {}
+        if isinstance(raw_probabilities, dict):
+            probabilities = {
+                name: float(value)
+                for name, value in raw_probabilities.items()
+                if name in criteria
+                and isinstance(value, int | float)
+                and not isinstance(value, bool)
+                and isfinite(value)
+                and 0 <= value <= 1
+            }
         model = response.get("model")
-        return Decision(choice, float(confidence), model if isinstance(model, str) else self.model)
+        return Decision(
+            choice,
+            float(confidence),
+            model if isinstance(model, str) else self.model,
+            probabilities,
+        )
 
     @staticmethod
     def _http_post(payload: dict[str, Any]) -> dict[str, Any]:

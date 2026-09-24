@@ -121,6 +121,8 @@ def generate_trace(
             "guide_target": [round(value, 2) for value in stroke.points[point_index]],
             "recent_choices": [record["choice"] for record in trace["steps"][-6:]],
         }
+        # Jev selected the exact guide center on every trial move when it was offered.
+        # Offer two equally safe offsets so its live choices visibly shape the line.
         criteria = {
             name: (
                 f"{name}: turn {move.turn_degrees:+.1f} degrees, "
@@ -128,8 +130,13 @@ def generate_trace(
                 f"({move.end[0]:.1f}, {move.end[1]:.1f})"
             )
             for name, move in moves.items()
+            if name != "center"
         }
-        decision = client.choose(state, criteria)
+        question = (
+            f"Which guided Logo turtle move should draw the "
+            f"{stroke.part.replace('_', ' ')} next? Keep its contour recognizable."
+        )
+        decision = client.choose(state, criteria, instructions=question)
         move = moves[decision.choice]
         turtle.advance(move, stroke)
         trace["steps"].append(
@@ -137,8 +144,20 @@ def generate_trace(
                 "stroke_index": stroke_index,
                 "point_index": point_index,
                 "part": stroke.part,
+                "question": question,
+                "options": criteria,
+                "option_moves": {
+                    name: {
+                        "turn_degrees": move.turn_degrees,
+                        "forward_pixels": move.forward_pixels,
+                        "end": list(move.end),
+                    }
+                    for name, move in moves.items()
+                    if name in criteria
+                },
                 "choice": decision.choice,
                 "confidence": decision.confidence,
+                "probabilities": decision.probabilities,
                 "response_model": decision.model,
                 "start": list(move.start),
                 "end": list(move.end),

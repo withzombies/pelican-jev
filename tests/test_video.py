@@ -26,8 +26,17 @@ def test_final_frame_reflects_jev_choices(tmp_path) -> None:
     assert ImageChops.difference(left, right).getbbox() is not None
 
 
+def test_final_frame_has_a_visible_turtle_at_the_last_position(tmp_path) -> None:
+    trace = _trace_for_choice(tmp_path, "left")
+    last_end = json.loads(trace.read_text())["steps"][-1]["end"]
+    frame = render_final_frame(trace)
+    red, green, blue = frame.getpixel((round(last_end[0]), round(last_end[1])))
+    assert green > red * 1.2
+    assert green > blue * 1.2
+
+
 def test_replay_cli_writes_h264_mp4_without_a_key(tmp_path) -> None:
-    trace = _trace_for_choice(tmp_path, "center")
+    trace = _trace_for_choice(tmp_path, "left")
     output = tmp_path / "pelican_on_bicycle.mp4"
     env = dict(os.environ)
     env.pop("TYPESAFE_API_KEY", None)
@@ -59,7 +68,7 @@ def test_replay_cli_writes_h264_mp4_without_a_key(tmp_path) -> None:
             "-select_streams",
             "v:0",
             "-show_entries",
-            "stream=codec_name,width,height,r_frame_rate",
+            "stream=codec_name,width,height,r_frame_rate,nb_frames",
             "-of",
             "json",
             str(output),
@@ -69,5 +78,7 @@ def test_replay_cli_writes_h264_mp4_without_a_key(tmp_path) -> None:
         text=True,
     )
     stream = json.loads(probe.stdout)["streams"][0]
-    assert stream == {"codec_name": "h264", "width": 1280, "height": 720, "r_frame_rate": "30/1"}
+    assert stream["codec_name"] == "h264"
+    assert (stream["width"], stream["height"], stream["r_frame_rate"]) == (1280, 720, "30/1")
+    assert int(stream["nb_frames"]) > len(json.loads(trace.read_text())["steps"])
     assert output.stat().st_size > 0

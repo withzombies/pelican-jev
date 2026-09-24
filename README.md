@@ -1,6 +1,6 @@
 # Jev turtle: a pelican on a bicycle
 
-Jev from TypeSafe AI chooses each visible Logo-style turtle advance from three bounded moves. A fixed guide keeps the pelican and bicycle recognizable. The program saves every live decision in a JSON trace and turns that exact run into a video with the selected move and confidence beside the drawing.
+Jev from TypeSafe AI chooses each visible Logo-style turtle advance from two distinct bounded moves. A fixed guide keeps the pelican and bicycle recognizable. An animated turtle follows each stroke and travels with its pen up between paths. The program saves every live decision in a JSON trace and turns that exact run into a video with the question asked, both offered moves, Jev's answer and probabilities, and the resulting Logo commands.
 
 ## Run
 
@@ -22,7 +22,7 @@ Replay a completed trace without a key or extra Jev calls:
 python3.11 -m pelican_jev replay
 ```
 
-The default video is a 1280×720, 30 fps H.264 MP4. Each move gets five animation frames and the final drawing holds for two seconds. Use `--trace`, `--output`, `--frames-per-step`, and `--hold-seconds` to change file locations or pacing.
+The default video is a 1280×720, 30 fps H.264 MP4 suitable for attaching to an X post. Each drawn move gets five animation frames; the turtle visibly travels between paths with its pen up, and the final drawing holds for two seconds. Use `--trace`, `--output`, `--frames-per-step`, and `--hold-seconds` to change file locations or pacing. The default duration is well below [X's standard 140-second limit](https://help.x.com/en/using-x/x-videos).
 
 ## Verify
 
